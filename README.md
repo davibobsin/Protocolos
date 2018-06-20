@@ -1,11 +1,21 @@
 # Protocolos
 ## Sistema de controlador/planta usando TCP/IP
-> Davi Bobsin
+* Davi Bobsin
+* Igor Fantinel Diesel
+* UFRGS - 2018/1
+* Prof. Alceu Heinke
 
-> Igor Fantinel Diesel
+Tarefas:
+- [ ] *Makefile* 
+- [ ] Biblioteca Gráfica para Plotagem de Sinais
+- [ ] Servidor
+- [ ] Cliente
 
-> UFRGS - 2018/1
+Comandos sugeridos para compilar o projeto:
 
-> Prof. Alceu Heinke
-
-
+```
+c:		Compila e gera os executáveis.
+clean:		Limpa arquivos temporários e backups (usar antes de upar par ao GIT).
+help:		Mostra os comandos do make.
+prepare:	Gera os arquivos necessários para compilar pelo CMake.
+```

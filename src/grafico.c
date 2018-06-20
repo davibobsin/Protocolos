@@ -12,6 +12,10 @@
 #define BPP 32
 typedef Uint32 PixelType;
 
+/* 
+ * 
+ * 
+ */
 
 
 typedef struct canvas {
@@ -191,4 +195,4 @@ int main( int argc, const char* argv[] ) {
   while(1) {
     quitevent();
   }
-}
+} 

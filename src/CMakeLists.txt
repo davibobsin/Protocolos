@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 2.0)
+project(ProgramClient)
+find_package(SDL REQUIRED)
+
+set(EXECUTABLE_OUTPUT_PATH "../bin")
+
+set(FILES_FOLDER ../src)
+set(ARQUIVOS_CLIENT ${FILES_FOLDER}/client.c)
+set(ARQUIVOS_SERVER ${FILES_FOLDER}/server.c)
+set(ARQUIVOS_GRAFICO ${FILES_FOLDER}/grafico.c)
+add_executable(client ${ARQUIVOS_CLIENT})
+add_executable(server ${ARQUIVOS_SERVER})
+add_executable(grafico ${ARQUIVOS_GRAFICO})
+
+TARGET_LINK_LIBRARIES( client pthread)
+TARGET_LINK_LIBRARIES( client m)
+TARGET_LINK_LIBRARIES( client ${SDL_LIBRARY} )
+TARGET_LINK_LIBRARIES( server pthread)
+TARGET_LINK_LIBRARIES( server m)
+TARGET_LINK_LIBRARIES( server ${SDL_LIBRARY} )
+TARGET_LINK_LIBRARIES( grafico pthread)
+TARGET_LINK_LIBRARIES( grafico m)
+TARGET_LINK_LIBRARIES( grafico ${SDL_LIBRARY} )
