@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <math.h>
+#include <time.h>
 
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
@@ -12,10 +13,6 @@
 #define BPP 32
 typedef Uint32 PixelType;
 
-/* 
- * 
- * 
- */
 
 
 typedef struct canvas {
@@ -182,17 +179,38 @@ void quitevent() {
 //
 //
 
-int main( int argc, const char* argv[] ) {
-  Tdataholder *data;
-  double t=0;
+int tempo(int milisec){
+  struct timespec req = {0};
+  req.tv_sec = 0;
+  req.tv_nsec = milisec * 1000000L;
+  nanosleep(&req, (struct timespec *)NULL);
 
+  return 1;  
+}
+
+void graf(){
+  Tdataholder *data;
+  double buffer[5][4];
+  double t=0;
+  int i;
+  
   data = datainit(640,480,55,110,45,0,0);
 
-  for (t=0;t<50;t+=0.1) {
-    datadraw(data,t,(double)(50+20*cos(t/5)),(double)(70+10*sin(t/10)),(double)(20+5*cos(t/2.5)));
-  }
+  //for (t=0;t<55;t+=0.1) {
+  //  datadraw(data,t,(double)(50+20*cos(t/5)),(double)(70+10*sin(t/10)),(double)(20+5*cos(t/2.5)));
+  //}
 
-  while(1) {
+    for(i=0;i<5;i++){
+      if(buffer[0]==0.0)
+	data = datainit(640,480,55,110,45,0,0);
+      datadraw(data,buffer[i][0],buffer[i][1],buffer[i][2],buffer[i][3]);
+    }
+    
     quitevent();
   }
-} 
+}
+
+
+int main( int argc, const char* argv[] ) {
+   graf();
+}
