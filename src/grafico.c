@@ -2,6 +2,7 @@
 #include <SDL/SDL.h>
 #include <math.h>
 #include <time.h>
+#include <pthread.h>
 
 #define SCREEN_W 640 //tamanho da janela que sera criada
 #define SCREEN_H 640
@@ -12,8 +13,6 @@
 //typedef Uint16 PixelType;
 #define BPP 32
 typedef Uint32 PixelType;
-
-
 
 typedef struct canvas {
   SDL_Surface *canvas;
@@ -42,6 +41,8 @@ typedef struct dataholder {
   PixelType OUTcolor;
 
 } Tdataholder;
+
+
 
 inline void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
 {
@@ -179,16 +180,7 @@ void quitevent() {
 //
 //
 
-int tempo(int milisec){
-  struct timespec req = {0};
-  req.tv_sec = 0;
-  req.tv_nsec = milisec * 1000000L;
-  nanosleep(&req, (struct timespec *)NULL);
-
-  return 1;  
-}
-
-void graf(){
+void graph(){
   Tdataholder *data;
   double buffer[5][4];
   double t=0;
@@ -203,7 +195,7 @@ void graf(){
     for(i=0;i<5;i++){
       if(buffer[0]==0.0)
 	data = datainit(640,480,55,110,45,0,0);
-      datadraw(data,buffer[i][0],buffer[i][1],buffer[i][2],buffer[i][3]);
+	datadraw(data,buffer[i][0],buffer[i][1],buffer[i][2],buffer[i][3]);
     }
     
     quitevent();
@@ -212,5 +204,9 @@ void graf(){
 
 
 int main( int argc, const char* argv[] ) {
-   graf();
+   pthread_t thread_id;
+   pthread_create(&thread_id, NULL, graph, NULL);
+   
+   pthread_join(thread_id, NULL);
+   exit(0);
 }
