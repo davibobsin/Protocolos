@@ -1,0 +1,2 @@
+/usr/bin/ar cr libbib_graf.a  CMakeFiles/bib_graf.dir/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/bib_graf.o
+/usr/bin/ranlib libbib_graf.a

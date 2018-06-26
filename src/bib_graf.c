@@ -183,27 +183,14 @@ void quitevent() {
 //
 //
 
-void *graph(void *arg){
-  Tdataholder *data;
-  int i;
-  double t;
-  
-  data = datainit(640,480,55,110,45,0,0);
-
-  for (t=0;t<55;t+=0.1) {
-    datadraw(data,t,(double)(50+20*cos(t/5)),(double)(70+10*sin(t/10)),(double)(20+5*cos(t/2.5)));
-  }
-
-  while(1){
-  quitevent();
-  }
-}
-
-
+/*
 int main( int argc, const char* argv[] ) {
-   pthread_t thread_id;
-   pthread_create(&thread_id, NULL, graph, NULL);
+   pthread_t thread_graficos thread_update;
+   pthread_create(&thread_graficos, NULL, graph, NULL);
+   pthread_create(&thread_update, NULL, update, NULL);
    
-   pthread_join(thread_id, NULL);
+   pthread_join(thread_graficos, NULL);
+   pthread_join(thread_update, NULL);
    exit(0);
 }
+*/
