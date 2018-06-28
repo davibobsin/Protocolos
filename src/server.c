@@ -17,6 +17,26 @@ int nivel = 100;
 int simulacao=0;
 
 
+typedef struct data_struct {
+  double saida[20];
+  double controle[20];
+  double tempo[20];
+  double level[20]; //Nivel do tanque...
+  double valor; //valor que vem da comucicacao IP. Valor da abertura da valvula
+  int atualizar; //flag para atualizar o valor da valvula. 1-AbreValvula 2-FechaValvula
+} Data;
+
+Data dados;
+
+int mili(int milisec){
+  struct timespec req = {0};
+  req.tv_sec = 0;
+  req.tv_nsec = milisec * 1000000L;
+  nanosleep(&req, (struct timespec *)NULL);
+
+  return 1;  
+}
+
 void chamar(char *str,int valor,int qtd,char *print){
   int find=0;
   
@@ -46,13 +66,17 @@ void chamar(char *str,int valor,int qtd,char *print){
   }
   if(strcmp(str,"abreValvula")==0)
   {
-    valvula += valor;
+    //valvula += valor;
+    dados.valor = valor;
+    dados.atualizar = 1;
     sprintf(print,"%s%d!",print,valvula);
     find=1;
   }
   if(strcmp(str,"fechaValvula")==0)
   {
-    valvula -= valor;
+    //valvula -= valor;
+    dados.valor = valor;
+    dados.atualizar = 2;
     sprintf(print,"%s%d!",print,valvula);
     find=1;
   }
@@ -156,66 +180,97 @@ void Graph(){
 }
 
 void Plant(){
-  /*
-  if(abrevalvula) {
-    delta   += (value)
-  }
-  if(fechavalvula) {
-    delta -= (value)
-  }
-
-  if(delta > 0) {
-    if(delta < 0.02*dt){
-	in.angle(T+dT)= in.angle(T)+delta
-	delta = 0 
-    } else{
-	in.angle(T+dT)=  in.angle(T)+0.02*dT
-	delta -=  0.02*dT 
+  int dT=1, T=0 ,i=0;
+  double delta=0, inangle[20], outangle[20];
+  
+  //MUTEX ON
+  dados.level[0]=0.4;
+  //MUTEX OFF
+ 
+  
+  //** INICIO LOOP INFINITO**
+  while(1){   
+    for(i=0;i<20;i++){ 
+     
+    mili(10);
+      
+    //**** INICIO MUTEX1 PLANTA***
+      if(dados.atualizar==1) { //Abre Valvula
+	delta += (dados.valor); //valor a abrir a valvula
+	dados.atualizar=0;
+      }
+      if(dados.atualizar==2) { //Fecha Valvula
+	delta -= (dados.valor); //Valor a fechar a valvula
+	dados.atualizar=0;
+      }
+    //****FIM MUTEX1 PLANTA***
+    
+   /* 
+      if(delta > 0) {
+	if(delta < 0.02*dT){
+	    in.angle(T+dT)= in.angle(T)+delta
+	    delta = 0 
+	} else{
+	    in.angle(T+dT)=  in.angle(T)+0.02*dT
+	    delta -=  0.02*dT 
+	    }
+      }else if(delta < 0){  
+	if(delta > -0.02*dT){
+	    in.angle(T+dT)= in.angle(T)+delta
+	    delta = 0
+	}else{
+	    in.angle(T+dT)=  in.angle(T)-0.02*dT
+	    delta +=  0.02*dT
 	}
-  }else if(delta < 0){  
-    if(delta > -0.02*dt){
-	in.angle(T+dT)= in.angle(T)+delta
-	delta = 0
-    }else{
-	in.angle(T+dT)=  in.angle(T)-0.02*dT
-	delta +=  0.02*dT
+      }
+    
+
+      influx = 1*sin(pi/2*in.angle/100)
+      outflux= (MAX/100)*(level(T)/1.25+0.2)*sin(pi/2*out.angle/100)
+
+      //**** INICIO MUTEX2 PLANTA***
+      level(0)=0.4
+      level(T+dT)=level(T)+0.00001*dT*(influx-outflux)
+      //**** FIM MUTEX2 PLANTA****/
     }
+    // in.angle(0)=in.angle(19); //Reseta o vetor, ultimo valor é o primeiro
+    
+    T=0; // Fim do FOR, somente reseta o vetor pra salvar só 20 posições....
+
 }
+//** FIM LOOP INFINITO*
 
-influx = 1*sin(pi/2*in.angle/100)
-outflux= (MAX/100)*(level(T)/1.25+0.2)*sin(pi/2*out.angle/100)
-level(0)=0.4
-level(T+dT)=level(T)+0.00001*dT*(influx-outflux)
 
-dT em miliseconds <=> setPeriodo
 
-MAX <=> setConsumo
+//dT em miliseconds <=> setPeriodo
+//MAX <=> setConsumo
+//===================================
 
-===================================
+// **** N SEI Q Q A FUNCAO OUTANGLE FAZ
 
-double outangle(double t) {
-  if(t <= 0) {
-    return 50;
-  }
-  if(t<20000) {
-    return (50+t/400);
-  }
-  if(t<30000) {
-    return 100;
-  }
-  if(t<50000) {
-    return (100-(t-30000)/250);
-  }
-  if(t<70000) {
-    return (20 + (t-50000)/1000);
-  }
+//   double outangle(double t) {
+//     if(t <= 0) {
+//       return 50;
+//     }
+//     if(t<20000) {
+//       return (50+t/400);
+//     }
+//     if(t<30000) {
+//       return 100;
+//     }
+//     if(t<50000) {
+//       return (100-(t-30000)/250);
+//     }
+//     if(t<70000) {
+//       return (20 + (t-50000)/1000);
+//     }
+// 
+//     if(t<100000) {
+//       return(40+20*cos((t-70000)*2*pi/10000));
+//     }
+//     return 100;
+//   }
 
-  if(t<100000) {
-    return(40+20*cos((t-70000)*2*pi/10000));
-  }
-  return 100;
-}
-*/
 }
 
 
@@ -228,5 +283,10 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
+    //thread ip server..
      IPServer(argv[1]);
+     
+    //Planta
+     
+    //thread do grafico
 }
