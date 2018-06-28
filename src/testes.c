@@ -9,6 +9,7 @@ typedef struct data_struct {
 } Data;
 
 Data dados;
+double t=0;
 
 int mili(int milisec){
   struct timespec req = {0};
@@ -31,32 +32,32 @@ void *graph(void *arg){
   }*/
   
   while(1){
-    for(i=j;i<(j+5);i++){
-      datadraw(data,dados.tempo[i]-time_offset,dados.controle[i],dados.valor[i],dados.saida[i]);
-      if((dados.tempo[i]-time_offset)>=55){
-	time_offset+=55;
-	data = datainit(640,480,55,110,45,0,0);
+    for(j=0;j<20;j+=5){
+      mili(50);
+      for(i=j;i<(j+5);i++){
+	datadraw(data,dados.tempo[i]-time_offset,dados.controle[i],dados.valor[i],dados.saida[i]);
+	if((dados.tempo[i]-time_offset)>=55){
+	  time_offset+=55;
+	  data = datainit(640,480,55,110,45,0,0);
+	}
       }
+      quitevent();
     }
-    j+=5;
-    if(j==20) j=0;
-    mili(50);
-    quitevent();
   }
 }
 
-
-
 void simul(){
   int i,j;
-  for(j=0;j<500;j++)
+  for(j=0;j<500;j++){
     for(i=0;i<20;i++){
-      dados.tempo[i] += 0.01;
+      t += 0.01; 
+      dados.tempo[i] = t;
       dados.controle[i] = (double)(50+20*cos(dados.tempo[i]/5));
       dados.valor[i] = (double)(70+10*sin(dados.tempo[i]/10));
       dados.saida[i] = (double)(20+5*cos(dados.tempo[i]/2.5));
       mili(10);
     }
+  }
 }
 
 int main( int argc, const char* argv[] ) {
