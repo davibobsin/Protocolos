@@ -6,6 +6,18 @@
 
 #IncludeRegexTransform: 
 
+/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/bib_graf.c
+stdio.h
+-
+SDL/SDL.h
+-
+math.h
+-
+time.h
+-
+pthread.h
+-
+
 /home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/server.c
 stdio.h
 -
@@ -15,10 +27,16 @@ string.h
 -
 unistd.h
 -
+math.h
+-
 sys/types.h
 -
 sys/socket.h
 -
 netinet/in.h
+-
+bib_graf.c
+/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/bib_graf.c
+pthread.h
 -
 

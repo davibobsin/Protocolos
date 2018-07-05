@@ -338,5 +338,5 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 FIND_PACKAGE_MESSAGE_DETAILS_SDL:INTERNAL=[/usr/lib64/libSDLmain.a;/usr/lib64/libSDL.so;-lpthread][/usr/include/SDL][v1.2.15()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
-SDL_LIBRARY_TEMP:INTERNAL=/usr/lib64/libSDLmain.a;/usr/lib64/libSDL.so;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread;-lpthread
+SDL_LIBRARY_TEMP:INTERNAL=/usr/lib64/libSDLmain.a;/usr/lib64/libSDL.so;-lpthread;-lpthread
 
