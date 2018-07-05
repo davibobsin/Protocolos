@@ -28,12 +28,12 @@ double pi=3.1415926;
 
 
 typedef struct data_struct {
-  double saida[20];
-  double controle[20];
-  double tempo[20];
-  double level[20]; //Nivel do tanque...
-  double inangle[20]; // Angulo de entrada da válvula?
-  double outangle[20]; // Angulo de saída da válvula?
+  double saida[21];
+  double controle[21];
+  double tempo[21];
+  double level[21]; //Nivel do tanque...
+  double inangle[21]; // Angulo de entrada da válvula?
+  double outangle[21]; // Angulo de saída da válvula?
   double valor; //valor que vem da comucicacao IP. Valor da abertura da valvula
 
   int consumo; //Primeira info
@@ -226,8 +226,8 @@ void IPServer(char *port){
 
 
 void *plant(){
-  int dT=1, T=0 ,i=0;
-  double delta=0, influx, outflux;
+  int  T=0 ,i=0;
+  double delta=0.0, dT=10.0, influx, outflux;
   
   //MUTEX ON
   dados.level[0]=0.4;
@@ -238,7 +238,7 @@ void *plant(){
   //** INICIO LOOP INFINITO**
   while(1){   
    
-    for(i=0;i<19;i++){    
+    for(i=0;i<20;i++){    
       
     //**** INICIO MUTEX1 PLANTA***
       if(dados.atualizar==1) { //Abre Valvula
@@ -250,45 +250,51 @@ void *plant(){
 	dados.atualizar=0;
       }
     //****FIM MUTEX1 PLANTA***
-    
       
      mili(10); // Executa a rotina da planta a cada 10ms... 
 
-      if(delta > 0) {
+	
+      if(delta > 0.0) {
 	if(delta < 0.02*dT){
 	    dados.inangle[T+1]= dados.inangle[T]+delta;
-	    delta = 0;
+	    delta = 0.0;
 	} else{
 	    dados.inangle[T+1]= dados.inangle[T]+0.02*dT;
 	    delta -=  0.02*dT; 
 	    }
-      }else if(delta < 0){  
+      }else if(delta < 0.0){  
 	if(delta > -0.02*dT){
 	    dados.inangle[T+1]= dados.inangle[T]+delta;
-	    delta = 0;
+	    delta = 0.0;
 	}else{
 	    dados.inangle[T+1]=  dados.inangle[T]-0.02*dT;
 	    delta +=  0.02*dT;
 	}
-      }
+      }else{
+      	dados.inangle[T+1]=dados.inangle[T];	
+	}
+     
          
-      t = t+T;
-      dados.tempo[i]=t;
-      dados.outangle[i]=outangle(t);
+      t = t+dT;
+      dados.tempo[T+1]=t;
+      dados.outangle[T+1]=outangle(t);
+      
       influx = 1*sin(pi/2*dados.inangle[T]/100);
-      outflux= (dados.consumo/100)*(dados.level[T]/1.25+0.2)*sin(pi/2*dados.outangle[i]/100); //outangle é uma função...
+      outflux= (dados.consumo/100.0)*(dados.level[T]/1.25+0.2)*sin(pi/2*dados.outangle[T+1]/100.0); //outangle é uma função...
 
       //**** INICIO MUTEX2 PLANTA***
-      //dados.level[0]=0.4;
       dados.level[T+1]=dados.level[T]+0.00001*dT*(influx-outflux);
       //**** FIM MUTEX2 PLANTA**
-    //  printf("%lf %lf %lf %lf \n", dados.level[T], dados.inangle[T], outangle(t), delta);
-
+      //printf("%lf %lf %lf %lf %lf %lf %lf %d \n",dados.tempo[T], dados.level[T], dados.inangle[T], outangle(t), delta, influx, outflux, T);
+      
       T++;
     }
 
-    dados.inangle[0]=dados.inangle[19]; //Reseta o vetor, ultimo valor é o primeiro   
-    dados.level[0]=dados.level[19];
+    dados.inangle[0]=dados.inangle[20]; //Reseta o vetor, ultimo valor é o primeiro   
+    dados.outangle[0]=dados.outangle[20];
+    dados.tempo[0]=dados.tempo[20];
+    
+    dados.level[0]=dados.level[20];
     T=0; // Fim do FOR, somente reseta o vetor pra salvar só 20 posições....
     quitevent();  
    }
@@ -316,8 +322,8 @@ void *graph(){ //void *arg){
       mili(50);
       for(i=j;i<(j+5);i++){
 	//printf("%d \n", dados.level[i]);
-	datadraw(data,dados.tempo[i],dados.level[i],dados.outangle[i],dados.inangle[i]);  //dados.tempo[i]-time_offset,dados.controle[i],dados.valor[i],dados.saida[i]);
-	if((dados.tempo[i]-time_offset)>=55){
+	datadraw(data,dados.tempo[i]/1000-time_offset,dados.level[i]*100,dados.outangle[i],dados.inangle[i]);  //dados.tempo[i]-time_offset,dados.controle[i],dados.valor[i],dados.saida[i]);
+	if((dados.tempo[i]/1000-time_offset)>=55){
 	  time_offset+=55;
 	  data = datainit(640,480,55,110,45,0,0);
 	}
@@ -342,10 +348,10 @@ int main(int argc, char *argv[])
    // graph();	
     
    
-    pthread_create(&thread_graf, NULL, graph, NULL);
+   
     pthread_create(&thread_plant, NULL, plant, NULL);
-  
-      
+    pthread_create(&thread_graf, NULL, graph, NULL);
+       
     pthread_join(thread_graf, NULL);
     pthread_join(thread_plant, NULL);
 

@@ -1,1 +1,0 @@
-/usr/bin/cc      CMakeFiles/client.dir/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/client.o  -o /home/users/eng10048_3/Documents/PROTO_2018/Protocolos/bin/client -rdynamic -lpthread -lm -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 

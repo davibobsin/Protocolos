@@ -1,1 +1,0 @@
-/usr/bin/cc      CMakeFiles/teste.dir/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/testes.o  -o /home/users/eng10048_3/Documents/PROTO_2018/Protocolos/bin/teste -rdynamic -lpthread -lm -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 

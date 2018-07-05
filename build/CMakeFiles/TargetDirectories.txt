@@ -1,5 +1,0 @@
-/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/build/CMakeFiles/bib_graf.dir
-/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/build/CMakeFiles/client.dir
-/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/build/CMakeFiles/grafico.dir
-/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/build/CMakeFiles/server.dir
-/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/build/CMakeFiles/teste.dir

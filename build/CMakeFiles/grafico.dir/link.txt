@@ -1,1 +1,0 @@
-/usr/bin/cc      CMakeFiles/grafico.dir/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/grafico.o  -o /home/users/eng10048_3/Documents/PROTO_2018/Protocolos/bin/grafico  -L/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/build -rdynamic -lpthread -lm libbib_graf.a -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 

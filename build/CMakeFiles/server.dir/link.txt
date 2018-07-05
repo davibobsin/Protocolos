@@ -1,1 +1,0 @@
-/usr/bin/cc      CMakeFiles/server.dir/home/users/eng10048_3/Documents/PROTO_2018/Protocolos/src/server.o  -o /home/users/eng10048_3/Documents/PROTO_2018/Protocolos/bin/server -rdynamic -lpthread -lm -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 
