@@ -18,12 +18,10 @@
  * cliente(CLP)  ang entrada e  nivel (calculados pelo controle...)
  *
  */ 
-int per_sim = 0;
-int max = 50;
-int valvula = 0;
-int nivel = 100;
+double per_sim = 0;
 int simulacao=0;
 double t=0;
+int T=0;
 double pi=3.1415926;
 
 
@@ -53,7 +51,7 @@ int mili(int milisec){
   return 1;  
 }
 
-void chamar(char *str,int valor,int qtd,char *print){
+void chamar(char *str,double valor,int qtd,char *print){
   int find=0;
   
   
@@ -85,7 +83,7 @@ void chamar(char *str,int valor,int qtd,char *print){
     //valvula += valor;
     dados.valor = valor;
     dados.atualizar = 1;
-    sprintf(print,"%s%d!",print,valvula);
+    sprintf(print,"%s%lf!",print,dados.valor);
     find=1;
   }
   if(strcmp(str,"fechaValvula")==0)
@@ -93,12 +91,13 @@ void chamar(char *str,int valor,int qtd,char *print){
     //valvula -= valor;
     dados.valor = valor;
     dados.atualizar = 2;
-    sprintf(print,"%s%d!",print,valvula);
+    sprintf(print,"%s%lf!",print,dados.valor);
     find=1;
   }
   if(strcmp(str,"getNivel")==0)
   {
-      sprintf(print,"%s%d!",print,nivel);
+      sprintf(print,"%s%lf!",print,dados.level[T]);
+      printf("%lf \n ",dados.level[T]);
       find=1;
   }
   if(!find)
@@ -204,7 +203,7 @@ void IPServer(char *port){
       if (newsockfd < 0) 
 	    error("ERROR on accept");
 	clear();
-      while(!sair){
+      while(1){
 
 	bzero(buffer,256);
 	n = read(newsockfd,buffer,255);
@@ -219,6 +218,7 @@ void IPServer(char *port){
 	
 	n = write(newsockfd,escrita,200);
 	if (n < 0) error("ERROR writing to socket");
+	quitevent();
      }
      close(newsockfd);
      close(sockfd);
@@ -226,9 +226,11 @@ void IPServer(char *port){
 
 
 void *plant(){
-  int  T=0 ,i=0;
+  int  i=0;
   double delta=0.0, dT=10.0, influx, outflux;
   
+  while(!simulacao);
+
   //MUTEX ON
   dados.level[0]=0.4;
 
@@ -311,6 +313,8 @@ void *graph(){ //void *arg){
   int i,j=0;
   double time_offset=0;
   
+  while(!simulacao);  
+
   data = datainit(640,480,55,110,45,0,0);
 /*
   for (t=0;t<55;t+=0.1) {
@@ -338,20 +342,18 @@ int main(int argc, char *argv[])
 {
     pthread_t thread_graf, thread_plant;
     //thread ip server..
-   // IPServer(argv);
       
-    dados.consumo = 50;
-    dados.valor = 50;
-    dados.atualizar = 1;
-    
+
    // plant();
    // graph();	
     
    
-   
     pthread_create(&thread_plant, NULL, plant, NULL);
     pthread_create(&thread_graf, NULL, graph, NULL);
+    IPServer(argv[1]);
+    
        
+   
     pthread_join(thread_graf, NULL);
     pthread_join(thread_plant, NULL);
 
