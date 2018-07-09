@@ -12,6 +12,10 @@
 
 #define clear() printf("\033[H\033[J")
 
+pthread_mutex_t mutex6 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex7 = PTHREAD_MUTEX_INITIALIZER;
+
+
 int simul=0;
 int sockfd, portno, n;    
 
@@ -25,10 +29,12 @@ typedef struct data_struct {
   double controle[21];
   double level[21];
   double tempo[21];
+  double erro[21];
+  double int_erro[21];
 } Data;
 
 Data dados;
-double sp=50,Kp=250;
+double sp=50,Kp=25,Kp=25;
 double t=0;
 int sair=0;
 
@@ -42,21 +48,25 @@ int mili(int milisec){
 }
 
 void *graph(void *arg){
-  Tdataholder *data;
+  Tdataholder *datacli;
   int i,j;
   double time_offset=0;
   
-  data = datainit(640,480,55,110,45,0,0);
+  datacli = datainit(640,480,55,110,45,0,0);
   
   while(1){
     for(j=1;j<20;j+=5){
       mili(50);
-      for(i=j;i<(j+5);i++){
-	datadraw(data,dados.tempo[i]-time_offset,dados.level[i],0,dados.controle[i]);
+    for(i=j;i<(j+5);i++){
+        pthread_mutex_lock( &mutex6 );
+      //  printf("%lf %lf %lf \n", dados.tempo[i]-time_offset,dados.level[i],dados.controle[i]);
+        datadraw2(datacli,dados.tempo[i]-time_offset,dados.level[i],dados.controle[i]);
+     
 	if((dados.tempo[i]-time_offset)>=55){
 	  time_offset+=55;
-	  data = datainit(640,480,55,110,45,0,0);
+	  datacli = datainit(640,480,55,110,45,0,0);
 	}
+	pthread_mutex_unlock( &mutex6 );
       }
       quitevent();
     }
@@ -87,12 +97,17 @@ int ident_param(char *str)
 void *controle()
 {
     int i=0;
-     
+    
+      
     while(!simul);
     
-     while(!sair){
+    while(!sair){
+        
 	
 	mili(10);
+    
+    pthread_mutex_lock( &mutex7 );
+    
 	bzero(buffer,256);
 	sprintf(buffer,"getNivel!");
     n = write(sockfd,buffer,strlen(buffer));
@@ -104,33 +119,51 @@ void *controle()
 	dados.level[i]=dados.level[i]*100;
 	dados.controle[i]=(sp-dados.level[i])*Kp;
 	
+    if (dados.controle[i]>=100) {
+        dados.controle[i]=100;
+    }else if(dados.controle[i]<=0){
+    
+        dados.controle[i]=0;
+    }
+    
+    
 	bzero(buffer,256);
-	if((dados.controle[i]-dados.controle[i-1])>0.0)
-		sprintf(buffer,"abreValvula#%lf!",dados.controle[i]-dados.controle[i-1]);
-	else
-		sprintf(buffer,"fechaValvula#%lf!",dados.controle[i-1]-dados.controle[i]);
-      	n = write(sockfd,buffer,strlen(buffer));
+	if((dados.controle[i]-dados.controle[i-1])>=0.0){
+		sprintf(buffer,"abreValvula#%lf!",(dados.controle[i]-dados.controle[i-1]));
+    }
+	else{
+		sprintf(buffer,"fechaValvula#%lf!",(dados.controle[i-1]-dados.controle[i]));
+    }
+    
+    
+    n = write(sockfd,buffer,strlen(buffer));
       	
-	bzero(buffer,256);
-    	n = read(sockfd,buffer,255);
-    	printf("%lf\n---------------\n",dados.level[i]); //Printa a resposta de 
-
+	
+    
+    //printf("%lf %lf %s \n--------teste-------\n", dados.controle[i],dados.controle[i-1], buffer); 
+        
+    bzero(buffer,256);
+    n = read(sockfd,buffer,255);//Printa a resposta de 
+    
 	dados.tempo[i]=t;
 	t+=0.01;
 	i++;
+    
 	if(i>=21){
 		i=1;
 		dados.controle[0]=dados.controle[20];
 	}
+	pthread_mutex_unlock( &mutex7 );
       }
-      printf("Fim do controle ...");
-    }
+
+    printf("Fim do controle ...");
+}
     
 
 void main(int argc, char *argv[])
 {
     //APAGAR
-   
+    int i=0;
     double t2=0;
     pthread_t thread_grafcli, thread_cont;
     
@@ -238,12 +271,17 @@ void main(int argc, char *argv[])
 //      }
     
     //--- CONTROLE---//
+       
+    
+    // FIM CONTROLE ************************
+    
+    
    
     
     pthread_join(thread_grafcli, NULL);
     pthread_join(thread_cont, NULL);
     
     close(sockfd); // Fecha socket
-    return 0;
+    
 }
 }

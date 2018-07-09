@@ -140,6 +140,23 @@ Tdataholder *datainit(int Width, int Height, double Xmax, double Ymax, double Lc
   return data;
 }
 
+Tdataholder *datainit2(int Width, int Height, double Xmax, double Ymax, double Lcurrent, double INcurrent, double OUTcurrent) {
+  Tdataholder *data2 = malloc(sizeof(Tdataholder));
+
+
+  data2->canvas=c_open(Width, Height, Xmax, Ymax);
+  data2->Tcurrent=0;
+  data2->Lcurrent=Lcurrent;
+  data2->Lcolor= (PixelType) SDL_MapRGB(data2->canvas->canvas->format,  255, 180,  0);
+  data2->INcurrent=INcurrent;
+  data2->INcolor=(PixelType) SDL_MapRGB(data2->canvas->canvas->format,  180, 255,  0);
+  data2->OUTcurrent=OUTcurrent;
+  data2->OUTcolor=(PixelType) SDL_MapRGB(data2->canvas->canvas->format,  0, 180,  255);
+
+
+  return data2;
+}
+
 void setdatacolors(Tdataholder *data, PixelType Lcolor, PixelType INcolor, PixelType OUTcolor) {
   data->Lcolor=Lcolor;
   data->INcolor=INcolor;
@@ -160,6 +177,18 @@ void datadraw(Tdataholder *data, double time, double level, double inangle, doub
 
   SDL_Flip(data->canvas->canvas);
 }
+
+void datadraw2(Tdataholder *data, double time, double level, double inangle) {
+  c_linedraw(data->canvas,data->Tcurrent,data->Lcurrent,time,level,data->Lcolor);
+  c_linedraw(data->canvas,data->Tcurrent,data->INcurrent,time,inangle,data->INcolor);
+  data->Tcurrent = time;
+  data->Lcurrent = level;
+  data->INcurrent = inangle;
+  
+
+  SDL_Flip(data->canvas->canvas);
+}
+
 
 void quitevent() {
   SDL_Event event;

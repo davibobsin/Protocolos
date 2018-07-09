@@ -23,6 +23,12 @@ int simulacao=0;
 double t=0;
 int T=0;
 double pi=3.1415926;
+pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex3 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex4 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex5 = PTHREAD_MUTEX_INITIALIZER;
+
 
 
 typedef struct data_struct {
@@ -54,6 +60,7 @@ int mili(int milisec){
 void chamar(char *str,double valor,int qtd,char *print){
   int find=0;
   
+  pthread_mutex_lock( &mutex5 );
   
   if(strcmp(str,"testaConexao")==0)
   {
@@ -104,10 +111,13 @@ void chamar(char *str,double valor,int qtd,char *print){
   {
       strcat(print,"Comando inválido!");
   } 
+  pthread_mutex_unlock( &mutex5 );
+  
 }
 
 void ident(char *str,char *print){
-  int i = 0,j=0,flag_qtd=0,valor;
+  int i = 0,j=0,flag_qtd=0;
+  double valor;
   char param[25],func[25];
   
   strcpy(print,"");		//Limpa string 'print'
@@ -117,11 +127,11 @@ void ident(char *str,char *print){
     {
       param[j]='\0';
       if(flag_qtd){
-	valor=atoi(param);
+	valor=atof(param);
       }
       else
       strcpy(func,param);
-	chamar(func,valor,flag_qtd,print);
+	  chamar(func,valor,flag_qtd,print);
       j=0;
       flag_qtd=0;
     }
@@ -237,32 +247,36 @@ void *plant(){
   
   while(!simulacao);
 
-  //MUTEX ON
+  pthread_mutex_lock( &mutex1 );
   dados.level[0]=0.4;
-
-  //MUTEX OFF
   dados.inangle[0]=0;
+  pthread_mutex_unlock( &mutex1 );
   
   //** INICIO LOOP INFINITO**
   while(1){   
    
     for(i=0;i<20;i++){    
       
-    //**** INICIO MUTEX1 PLANTA***
+    pthread_mutex_lock( &mutex2 ); //Mutex ON
+    
     if(dados.atualizar==1) { //Abre Valvula
-	delta += (dados.valor); //valor a abrir a valvula
-	dados.atualizar=0;
+        delta += (dados.valor); //valor a abrir a valvula
+        //printf("---- abre %f \n ", dados.valor);
+        dados.atualizar=0;
+        dados.valor=0;
       }
-      if(dados.atualizar==2) { //Fecha Valvula
-	delta -= (dados.valor); //Valor a fechar a valvula
-	dados.atualizar=0;
+    if(dados.atualizar==2) { //Fecha Valvula
+	  delta -= (dados.valor); //Valor a fechar a valvula
+      //printf("---- fecha %f \n ", dados.valor);
+	  dados.atualizar=0;
+      dados.valor=0;
       }
-    //****FIM MUTEX1 PLANTA***
+   
       
      mili(10); // Executa a rotina da planta a cada 10ms... 
 
 	
-      if(delta > 0.0) {
+    if(delta > 0.0) {
 	if(delta < 0.02*dT){
 	    dados.inangle[T+1]= dados.inangle[T]+delta;
 	    delta = 0.0;
@@ -286,24 +300,35 @@ void *plant(){
       t = t+dT;
       dados.tempo[T+1]=t;
       dados.outangle[T+1]=outangle(t);
+      if (dados.inangle[T+1]>=100)
+      {
+          dados.inangle[T+1]=100;
+          
+      }else if (dados.inangle[T+1]<=0.0)
+      {
+          dados.inangle[T+1]=0.0;          
+      }
+          
       
       influx = 1*sin(pi/2*dados.inangle[T]/100);
       outflux= (dados.consumo/100.0)*(dados.level[T]/1.25+0.2)*sin(pi/2*dados.outangle[T+1]/100.0); //outangle é uma função...
 
-      //**** INICIO MUTEX2 PLANTA***
+    
       dados.level[T+1]=dados.level[T]+0.00001*dT*(influx-outflux);
-      //**** FIM MUTEX2 PLANTA**
-      // printf("%lf %lf %lf %lf %lf %lf %lf %d \n",dados.tempo[T], dados.level[T], dados.inangle[T], outangle(t), delta, influx, outflux, T);
+    //  printf("%lf %lf %lf \n", dados.level[T]*100, dados.inangle[T], delta);
       
       T++;
+      pthread_mutex_unlock( &mutex2 ); // Mutex OFF
     }
 
+    pthread_mutex_lock( &mutex3 );
     dados.inangle[0]=dados.inangle[20]; //Reseta o vetor, ultimo valor é o primeiro   
     dados.outangle[0]=dados.outangle[20];
-    dados.tempo[0]=dados.tempo[20];
-    
+    dados.tempo[0]=dados.tempo[20];    
     dados.level[0]=dados.level[20];
     T=0; // Fim do FOR, somente reseta o vetor pra salvar só 20 posições....
+    pthread_mutex_unlock( &mutex3 );
+    
     quitevent();  
    }
 }
@@ -314,15 +339,19 @@ void *plant(){
 //===================================
 
 
-void *graph(){ //void *arg){
-  Tdataholder *data;
+void *graphser(){ //void *arg){
+  Tdataholder *data2;
   int i,j=0;
   double time_offset=0;
   
-  while(!simulacao);  
+  while(!simulacao); 
 
-  data = datainit(640,480,55,110,45,0,0);
-/*
+  //pthread_mutex_lock( &mutex1 );
+  
+  data2 = datainit2(640,480,55,110,45,0,0);
+  
+  //pthread_mutex_unlock( &mutex1 ); 
+/* 
   for (t=0;t<55;t+=0.1) {
     datadraw(data,t,(double)(50+20*cos(t/5)),(double)(70+10*sin(t/10)),(double)(20+5*cos(t/2.5)));
   }*/
@@ -331,13 +360,20 @@ void *graph(){ //void *arg){
     for(j=0;j<20;j+=5){
       mili(50);
       for(i=j;i<(j+5);i++){
-	//printf("%lf \n", dados.level[i]);
-	datadraw(data,dados.tempo[i]/1000-time_offset,dados.level[i]*100,dados.outangle[i],dados.inangle[i]);  //dados.tempo[i]-time_offset,dados.controle[i],dados.valor[i],dados.saida[i]);
-	if((dados.tempo[i]/1000-time_offset)>=55){
-	  time_offset+=55;
-	  data = datainit(640,480,55,110,45,0,0);
-	}
-      }
+          
+        //printf("%lf %lf %lf %lf \n", dados.tempo[i]/1000-time_offset,dados.level[i]*100,dados.outangle[i],dados.inangle[i]);
+        
+        pthread_mutex_lock( &mutex4 );
+        datadraw(data2,dados.tempo[i]/1000-time_offset,dados.level[i]*100,dados.inangle[i],dados.outangle[i]);  
+        
+        if((dados.tempo[i]/1000-time_offset)>=55){
+        time_offset+=55;
+        data2 = datainit(640,480,55,110,45,0,0);
+        }
+        
+	 pthread_mutex_unlock( &mutex4 );
+               
+     }
       quitevent();
     }
   }
@@ -348,27 +384,26 @@ int main(int argc, char *argv[])
 {
         
    // QtCore.QcoreApplication.setAttribute(QtCore.Qt.AA_x11InitThreads);
-    pthread_t thread_graf, thread_plant, thread_comunic;
+    pthread_t thread_grafser, thread_plant, thread_comunic;
     //thread ip server..
     
-    dados.consumo=100;
-    dados.atualizar=1;
-    dados.valor=0;
-    simulacao=1;
+  //  dados.consumo=100;
+  //  dados.atualizar=1;
+  //  dados.valor=0;
+  //  simulacao=1;
 
    // plant();
    // graph();	
     
      
      pthread_create(&thread_plant, NULL, plant, NULL);
-     pthread_create(&thread_graf, NULL, graph, NULL);
+     pthread_create(&thread_grafser, NULL, graphser, NULL);
      pthread_create(&thread_comunic, NULL, IPServer(argv[1]), NULL);
-   
+
      
 //        
-//    
-     pthread_join(thread_graf, NULL);
      pthread_join(thread_plant, NULL);
+     pthread_join(thread_grafser, NULL);     
      pthread_join(thread_comunic, NULL);
      
      //IPServer(argv[1]);
