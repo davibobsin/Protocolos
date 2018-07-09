@@ -61,12 +61,12 @@ void simul(){
 }
 
 int main( int argc, const char* argv[] ) {
-   pthread_t thread_graf, thread_simul;
-   
-   pthread_create(&thread_graf, NULL, graph, NULL);
-   pthread_create(&thread_simul, NULL, simul, NULL);
-   
-   pthread_join(thread_graf, NULL);
-   pthread_join(thread_simul, NULL);
-   exit(0);
+//    pthread_t thread_graf, thread_simul;
+//    
+//    pthread_create(&thread_graf, NULL, graph, NULL);
+//    pthread_create(&thread_simul, NULL, simul, NULL);
+//    
+//    pthread_join(thread_graf, NULL);
+//    pthread_join(thread_simul, NULL);
+//    exit(0);
 }

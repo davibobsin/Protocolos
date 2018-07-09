@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/igor/Documentos/Protocolos/src/bib_graf.c
+stdio.h
+-
+SDL/SDL.h
+-
+math.h
+-
+time.h
+-
+pthread.h
+-
+
+/home/igor/Documentos/Protocolos/src/client.c
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+string.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+netdb.h
+-
+pthread.h
+-
+bib_graf.c
+/home/igor/Documentos/Protocolos/src/bib_graf.c
+

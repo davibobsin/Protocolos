@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/grafico.dir/home/igor/Documentos/Protocolos/src/grafico.o  -o /home/igor/Documentos/Protocolos/bin/grafico  -L/home/igor/Documentos/Protocolos/build -lpthread -lm libbib_graf.a -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 

@@ -13,7 +13,7 @@
 //typedef Uint16 PixelType;
 #define BPP 32
 
-  double buffer[5][4];
+double bufferr[5][4];
 
 typedef Uint32 PixelType;
 
@@ -47,12 +47,12 @@ typedef struct dataholder {
 
 
 
-inline void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
+void c_pixeldraw(Tcanvas *canvas, int x, int y, PixelType color)
 {
   *( ((PixelType*)canvas->canvas->pixels) + ((-y+canvas->Yoffset) * canvas->canvas->w + x+ canvas->Xoffset)) = color;
 }
 
-inline void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
+void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
 {
   int offset =  (-y+canvas->Yoffset) * canvas->canvas->w;
   int x;
@@ -62,7 +62,7 @@ inline void c_hlinedraw(Tcanvas *canvas, int xstep, int y, PixelType color)
   }
 }
 
-inline void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
+void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
 {
   int offset = x+canvas->Xoffset;
   int y;
@@ -74,7 +74,7 @@ inline void c_vlinedraw(Tcanvas *canvas, int x, int ystep, PixelType color)
 }
 
 
-inline void c_linedraw(Tcanvas *canvas, double x0, double y0, double x1, double y1, PixelType color) {
+void c_linedraw(Tcanvas *canvas, double x0, double y0, double x1, double y1, PixelType color) {
   double x;
 
   for (x=x0; x<=x1; x+=canvas->Xstep) {

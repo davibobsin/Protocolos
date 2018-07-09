@@ -63,7 +63,7 @@ void chamar(char *str,double valor,int qtd,char *print){
   if(strcmp(str,"setPeriodoSimulacao")==0)
   {
     per_sim = valor;
-    sprintf(print,"%s%d!",print,per_sim);
+    sprintf(print,"%s%lf!",print,per_sim);
     find=1;
   }
   if(strcmp(str,"setConsumo")==0)
@@ -97,7 +97,7 @@ void chamar(char *str,double valor,int qtd,char *print){
   if(strcmp(str,"getNivel")==0)
   {
       sprintf(print,"%s%lf!",print,dados.level[T]);
-      printf("%lf \n ",dados.level[T]);
+     // printf("%lf \n ",dados.level[T]);
       find=1;
   }
   if(!find)
@@ -174,12 +174,14 @@ void error(const char *msg)
 }
 
 
-void IPServer(char *port){
+void *IPServer(char *port){
      int sockfd, newsockfd, portno,sair=0;
      socklen_t clilen;
      char buffer[256],escrita[256];
      struct sockaddr_in serv_addr, cli_addr;
      int n,m;
+     
+     //printf(" Teste \n");
      if (strlen(port)<2) {
          fprintf(stderr,"ERROR, no port provided\n");
          exit(1);
@@ -202,12 +204,16 @@ void IPServer(char *port){
 		  &clilen);
       if (newsockfd < 0) 
 	    error("ERROR on accept");
-	clear();
-      while(1){
+	//clear();
+    
+    
+    while(1){
 
 	bzero(buffer,256);
 	n = read(newsockfd,buffer,255);
+    
 	ident(buffer,escrita);
+    
 	if(strcmp(buffer,"sair")==0){
 	  sair=1;
 	  printf("Saindo\n");
@@ -243,7 +249,7 @@ void *plant(){
     for(i=0;i<20;i++){    
       
     //**** INICIO MUTEX1 PLANTA***
-      if(dados.atualizar==1) { //Abre Valvula
+    if(dados.atualizar==1) { //Abre Valvula
 	delta += (dados.valor); //valor a abrir a valvula
 	dados.atualizar=0;
       }
@@ -287,7 +293,7 @@ void *plant(){
       //**** INICIO MUTEX2 PLANTA***
       dados.level[T+1]=dados.level[T]+0.00001*dT*(influx-outflux);
       //**** FIM MUTEX2 PLANTA**
-      //printf("%lf %lf %lf %lf %lf %lf %lf %d \n",dados.tempo[T], dados.level[T], dados.inangle[T], outangle(t), delta, influx, outflux, T);
+      // printf("%lf %lf %lf %lf %lf %lf %lf %d \n",dados.tempo[T], dados.level[T], dados.inangle[T], outangle(t), delta, influx, outflux, T);
       
       T++;
     }
@@ -325,7 +331,7 @@ void *graph(){ //void *arg){
     for(j=0;j<20;j+=5){
       mili(50);
       for(i=j;i<(j+5);i++){
-	//printf("%d \n", dados.level[i]);
+	//printf("%lf \n", dados.level[i]);
 	datadraw(data,dados.tempo[i]/1000-time_offset,dados.level[i]*100,dados.outangle[i],dados.inangle[i]);  //dados.tempo[i]-time_offset,dados.controle[i],dados.valor[i],dados.saida[i]);
 	if((dados.tempo[i]/1000-time_offset)>=55){
 	  time_offset+=55;
@@ -340,24 +346,33 @@ void *graph(){ //void *arg){
 
 int main(int argc, char *argv[])
 {
-    pthread_t thread_graf, thread_plant;
+        
+   // QtCore.QcoreApplication.setAttribute(QtCore.Qt.AA_x11InitThreads);
+    pthread_t thread_graf, thread_plant, thread_comunic;
     //thread ip server..
-      
+    
+    dados.consumo=100;
+    dados.atualizar=1;
+    dados.valor=0;
+    simulacao=1;
 
    // plant();
    // graph();	
     
+     
+     pthread_create(&thread_plant, NULL, plant, NULL);
+     pthread_create(&thread_graf, NULL, graph, NULL);
+     pthread_create(&thread_comunic, NULL, IPServer(argv[1]), NULL);
    
-    pthread_create(&thread_plant, NULL, plant, NULL);
-    pthread_create(&thread_graf, NULL, graph, NULL);
-    IPServer(argv[1]);
-    
-       
-   
-    pthread_join(thread_graf, NULL);
-    pthread_join(thread_plant, NULL);
-
-    exit(0);
+     
+//        
+//    
+     pthread_join(thread_graf, NULL);
+     pthread_join(thread_plant, NULL);
+     pthread_join(thread_comunic, NULL);
+     
+     //IPServer(argv[1]);
+     exit(0);
     
     
      

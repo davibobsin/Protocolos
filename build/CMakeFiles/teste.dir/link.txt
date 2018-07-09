@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/teste.dir/home/igor/Documentos/Protocolos/src/testes.o  -o /home/igor/Documentos/Protocolos/bin/teste -lpthread -lm -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libbib_graf.a  CMakeFiles/bib_graf.dir/home/igor/Documentos/Protocolos/src/bib_graf.o
+/usr/bin/ranlib libbib_graf.a

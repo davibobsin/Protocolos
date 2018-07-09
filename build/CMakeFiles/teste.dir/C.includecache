@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/igor/Documentos/Protocolos/src/bib_graf.c
+stdio.h
+-
+SDL/SDL.h
+-
+math.h
+-
+time.h
+-
+pthread.h
+-
+
+/home/igor/Documentos/Protocolos/src/testes.c
+bib_graf.c
+/home/igor/Documentos/Protocolos/src/bib_graf.c
+pthread.h
+-
+

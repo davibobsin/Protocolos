@@ -6,10 +6,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <pthread.h>
 
 #include "bib_graf.c"
 
 #define clear() printf("\033[H\033[J")
+
+int simul=0;
+int sockfd, portno, n;    
+
+char buffer[256];
+
+struct sockaddr_in serv_addr;
+struct hostent *server;
 
 typedef struct data_struct {
   double inangle[21];
@@ -19,7 +28,7 @@ typedef struct data_struct {
 } Data;
 
 Data dados;
-double sp=50,Kp=10;
+double sp=50,Kp=250;
 double t=0;
 int sair=0;
 
@@ -75,21 +84,63 @@ int ident_param(char *str)
   return atoi(param);
 }
 
-int main(int argc, char *argv[])
+void *controle()
+{
+    int i=0;
+     
+    while(!simul);
+    
+     while(!sair){
+	
+	mili(10);
+	bzero(buffer,256);
+	sprintf(buffer,"getNivel!");
+    n = write(sockfd,buffer,strlen(buffer));
+      	
+	bzero(buffer,256);
+    n = read(sockfd,buffer,255);
+	sscanf(buffer,"%lf",&dados.level[i]);
+    
+	dados.level[i]=dados.level[i]*100;
+	dados.controle[i]=(sp-dados.level[i])*Kp;
+	
+	bzero(buffer,256);
+	if((dados.controle[i]-dados.controle[i-1])>0.0)
+		sprintf(buffer,"abreValvula#%lf!",dados.controle[i]-dados.controle[i-1]);
+	else
+		sprintf(buffer,"fechaValvula#%lf!",dados.controle[i-1]-dados.controle[i]);
+      	n = write(sockfd,buffer,strlen(buffer));
+      	
+	bzero(buffer,256);
+    	n = read(sockfd,buffer,255);
+    	printf("%lf\n---------------\n",dados.level[i]); //Printa a resposta de 
+
+	dados.tempo[i]=t;
+	t+=0.01;
+	i++;
+	if(i>=21){
+		i=1;
+		dados.controle[0]=dados.controle[20];
+	}
+      }
+      printf("Fim do controle ...");
+    }
+    
+
+void main(int argc, char *argv[])
 {
     //APAGAR
-    int i=0;
+   
     double t2=0;
+    pthread_t thread_grafcli, thread_cont;
     
-    int sockfd, portno, n;
-    pthread_t thread_graf;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
 
-    char buffer[256];
-    
+  
     // Inicio da configuração inicial de sockets 
     // (cria socket e etc) 
+    pthread_create(&thread_grafcli, NULL, graph, NULL);//THREAD 
+    pthread_create(&thread_cont, NULL, controle, NULL);//THREAD 
+    
     
     if (argc < 4 || argc > 4) {
        fprintf(stderr,"usage %s <hostname> <porta> <consumo>\n", argv[0]);
@@ -117,22 +168,26 @@ int main(int argc, char *argv[])
         error("ERROR connecting"); //Nao criou socket
     else{  
       
-      pthread_create(&thread_graf, NULL, graph, NULL);//THREAD GRAFICO
+     
+      
+      
       bzero(buffer,256);
       sprintf(buffer,"setConsumo#%d!",atoi(argv[3]));
       n = write(sockfd,buffer,strlen(buffer));
       
-	bzero(buffer,256);
-    	n = read(sockfd,buffer,255);
-    	printf("%s\n---------------\n",buffer); //Printa a resposta ao tempo de simulaçao inicial
+	  bzero(buffer,256);
+      n = read(sockfd,buffer,255);
+      printf("%s\n---------------\n",buffer); //Printa a resposta ao tempo de simulaçao inicial
 
       bzero(buffer,256);
       sprintf(buffer,"iniciaSimulacao!");
       n = write(sockfd,buffer,strlen(buffer));
       
-	bzero(buffer,256);
-    	n = read(sockfd,buffer,255);
-    	printf("%s\n---------------\n",buffer); //Printa a resposta do inicio da simulaçao
+	  bzero(buffer,256);
+      n = read(sockfd,buffer,255);
+      printf("%s\n---------------\n",buffer); //Printa a resposta do inicio da simulaçao
+      
+      simul=1;
 
     // Criou o socket corretamente, inicia loop de controle e comunicação
     
@@ -183,42 +238,12 @@ int main(int argc, char *argv[])
 //      }
     
     //--- CONTROLE---//
-      while(!sair){
-	
-	mili(10);
-	bzero(buffer,256);
-	sprintf(buffer,"getNivel!");
-      	n = write(sockfd,buffer,strlen(buffer));
-      	
-	bzero(buffer,256);
-    	n = read(sockfd,buffer,255);
-	sscanf(buffer,"%lf",&dados.level[i]);
-	dados.level[i]=dados.level[i]*100;
-	dados.controle[i]=(sp-dados.level[i])*Kp;
-	
-	bzero(buffer,256);
-	if((dados.controle[i]-dados.controle[i-1])>0.0)
-		sprintf(buffer,"abreValvula#%lf!",dados.controle[i]-dados.controle[i-1]);
-	else
-		sprintf(buffer,"fechaValvula#%lf!",dados.controle[i-1]-dados.controle[i]);
-      	n = write(sockfd,buffer,strlen(buffer));
-      	
-	bzero(buffer,256);
-    	n = read(sockfd,buffer,255);
-    	printf("%lf\n---------------\n",dados.level[i]); //Printa a resposta de 
-
-	dados.tempo[i]=t;
-	t+=0.01;
-	i++;
-	if(i>=21){
-		i=1;
-		dados.controle[0]=dados.controle[20];
-	}
-      }
-      printf("Fim do controle ...");
-    }
+   
     
-    pthread_join(thread_graf, NULL);
+    pthread_join(thread_grafcli, NULL);
+    pthread_join(thread_cont, NULL);
+    
     close(sockfd); // Fecha socket
     return 0;
+}
 }

@@ -1,0 +1,7 @@
+/home/igor/Documentos/Protocolos/build/CMakeFiles/rebuild_cache.dir
+/home/igor/Documentos/Protocolos/build/CMakeFiles/client.dir
+/home/igor/Documentos/Protocolos/build/CMakeFiles/bib_graf.dir
+/home/igor/Documentos/Protocolos/build/CMakeFiles/server.dir
+/home/igor/Documentos/Protocolos/build/CMakeFiles/grafico.dir
+/home/igor/Documentos/Protocolos/build/CMakeFiles/teste.dir
+/home/igor/Documentos/Protocolos/build/CMakeFiles/edit_cache.dir

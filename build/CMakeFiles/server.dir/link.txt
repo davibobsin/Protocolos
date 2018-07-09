@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/server.dir/home/igor/Documentos/Protocolos/src/server.o  -o /home/igor/Documentos/Protocolos/bin/server -lpthread -lm -Wl,-Bstatic -lSDLmain -Wl,-Bdynamic -lSDL -lpthread 
