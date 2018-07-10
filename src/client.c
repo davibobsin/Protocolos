@@ -30,11 +30,11 @@ typedef struct data_struct {
   double level[21];
   double tempo[21];
   double erro[21];
-  double int_erro[21];
+  double int_erro;
 } Data;
 
 Data dados;
-double sp=50,Kp=25,Kp=25;
+double sp=50,Kp=25,Ki=0.4;
 double t=0;
 int sair=0;
 
@@ -117,7 +117,18 @@ void *controle()
 	sscanf(buffer,"%lf",&dados.level[i]);
     
 	dados.level[i]=dados.level[i]*100;
-	dados.controle[i]=(sp-dados.level[i])*Kp;
+    dados.erro[i]=sp-dados.level[i];
+    dados.int_erro+=dados.erro[i];
+    
+     if (dados.int_erro>=100) {
+        dados.int_erro=100;
+    }else if(dados.int_erro<=0){
+    
+        dados.int_erro=0;
+    }
+    
+    
+	dados.controle[i]=(dados.erro[i]*Kp)+(dados.int_erro*Ki);
 	
     if (dados.controle[i]>=100) {
         dados.controle[i]=100;
@@ -152,6 +163,7 @@ void *controle()
 	if(i>=21){
 		i=1;
 		dados.controle[0]=dados.controle[20];
+        dados.erro[0]=dados.erro[20];
 	}
 	pthread_mutex_unlock( &mutex7 );
       }
